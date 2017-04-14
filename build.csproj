@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Run" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- 該当のソリューションファイル（sln）を指定 -->
+    <SolutionFile>C:\Project\VirtualDirTest\VirtualDirTest.sln</SolutionFile>
+
+    <!-- 出力のフォルダを指定 -->
+    <DeployFolder>C:\Deploy\VirtualDirTest</DeployFolder>
+  </PropertyGroup>
+
+  <Import Project="C:\Projects\VirtualDirTest\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets"/>
+
+  <Target Name="Run">
+    <CallTarget Targets="VirtualDirectory"/>
+    <CallTarget Targets="Build"/>
+    <CallTarget Targets="Publish"/>
+  </Target>
+
+  <Target Name="VirtualDirectory">
+    <WebDirectoryDelete VirtualDirectoryName="uc" />
+    <WebDirectoryCreate VirtualDirectoryName="uc"
+        VirtualDirectoryPhysicalPath="C:\Projects\VirtualDirTest\uc" />
+  </Target>
+
+  <Target Name="Build">
+    <MSBuild Projects="$(SolutionFile)"
+             Properties="Configuration=Release;" Targets="Clean;Build" />
+  </Target>
+
+  <Target Name="Publish">
+    <RemoveDir Directories="$(DeployFolder)"
+               ContinueOnError="true" />
+
+    <MSBuild Projects="$(WebAppProjectFile)"
+             Targets="_WPPCopyWebApplication;ResolveReferences;"
+             Properties="Configuration=Release;
+                         WebProjectOutputDir=$(DeployFolder);
+                         OutDir=$(DeployFolder)\bin/" />
+  </Target>
+</Project>
